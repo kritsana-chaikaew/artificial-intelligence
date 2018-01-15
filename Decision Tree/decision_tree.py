@@ -66,4 +66,15 @@ for i in range(1, len(data)):
     elif data[i][1] == 'Sunny':
         sunny[index] += 1
 
+overcast_entropy = entropy(overcast[0], overcast[1])
+rain_entropy = entropy(rain[0], rain[1])
+sunny_entropy = entropy(sunny[0], sunny[1])
+
+entropies = [overcast_entropy, rain_entropy, sunny_entropy]
+weight = [(x[0]+x[1])/14 for x in outlook[::]]
+weighted_entropies = sum([entropies[i]*weight[i] for i in range(len(entropies))])
+
 print(outlook)
+print(entropies)
+print(weight)
+print(weighted_entropies)
