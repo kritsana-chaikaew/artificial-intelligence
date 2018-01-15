@@ -8,6 +8,16 @@ class Attribute(object):
         self.values_count = dict(
                 (v,fields.count(v)) for v in self.values)
 
+class Node(object):
+    def __init__(self, attribute):
+        self.attribute = attribute
+        self.links = dict(
+                (attr, None) for attr in self.attribute.values)
+
+class Tree(object):
+    def __init__(self, root):
+        self.root = root
+
 attributes = []
 
 with open('training_example.csv', newline='') as training_example:
@@ -15,6 +25,3 @@ with open('training_example.csv', newline='') as training_example:
     transpose = zip(*reader)
     for row in transpose:
         attributes.append(Attribute(row))
-
-print(attributes[1].values)
-print(attributes[1].values_count[1])
