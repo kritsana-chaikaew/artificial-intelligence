@@ -30,13 +30,40 @@ def entropy(positive, negative):
     return -positive_ratio * math.log(positive_ratio, 2) \
         - negative_ratio * math.log(negative_ratio, 2)
 
+def classify(data, attribute):
+    pass
+
+data = []
+data_transpose = []
 attributes = {}
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
-    transpose = zip(*reader)
-    for row in transpose:
+    data = [r for r in reader]
+    data_transpose = zip(*data)
+    for row in data_transpose:
         attributes[row[0]] = Attribute(row)
 
 s = (attributes['PlayTennis'].fields.count('Yes'),
         attributes['PlayTennis'].fields.count('No'))
+
+overcast = [0, 0]
+rain = [0, 0]
+sunny = [0, 0]
+
+outlook = [overcast, rain, sunny]
+
+for i in range(1, len(data)):
+    if data[i][5] == 'Yes':
+        index = 0
+    elif data[i][5] == 'No':
+        index = 1
+
+    if data[i][1] == 'Overcast':
+        overcast[index] += 1
+    elif data[i][1] == 'Rain':
+        rain[index] += 1
+    elif data[i][1] == 'Sunny':
+        sunny[index] += 1
+
+print(outlook)
