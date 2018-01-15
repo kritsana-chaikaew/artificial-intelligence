@@ -30,12 +30,13 @@ def entropy(positive, negative):
     return -positive_ratio * math.log(positive_ratio, 2) \
         - negative_ratio * math.log(negative_ratio, 2)
 
-attributes = []
+attributes = {}
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
     transpose = zip(*reader)
     for row in transpose:
-        attributes.append(Attribute(row))
+        attributes[row[0]] = Attribute(row)
 
-print(entropy(5, 0))
+s = (attributes['PlayTennis'].fields.count('Yes'),
+        attributes['PlayTennis'].fields.count('No'))
