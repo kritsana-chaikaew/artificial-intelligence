@@ -24,13 +24,13 @@ def average_entropy(sample, attribute):
 
 def split(data, attribute, attribute_number):
     for i in range(1, len(data)):
-        if data[i][5] == 'Yes':
+        if data[i][-1] == 'Yes':
             index = 0
-        elif data[i][5] == 'No':
+        elif data[i][-1] == 'No':
             index = 1
 
         for value in attribute.keys():
-            if data[i][attribute_number] == value:     # 1 is outlook attribute
+            if data[i][attribute_number] == value:
                 attribute[value][index] += 1
 
     return attribute
@@ -43,20 +43,22 @@ root_attribute_number = 0
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
-    data = [r for r in reader]
+    data = [r[1:] for r in reader]
     data_transpose = zip(*data)
     data_transpose = [list(x) for x in data_transpose]
 
-s = [data_transpose[5].count('Yes'),
-        data_transpose[5].count('No')]
+s = [data_transpose[-1].count('Yes'),
+        data_transpose[-1].count('No')]
 
-for number in range(1, len(data[0])-1):
+sample_entropy = entropy(s)
+
+for number in range(len(data[0])-1):
     attributes.append({})
-    for value in set(data_transpose[number][1:]):      # 1 is outlook attribute
-        attributes[number-1][value] = [0, 0]
+    for value in set(data_transpose[number][1:]):
+        attributes[number][value] = [0, 0]
 
-    attributes[number-1] = split(data, attributes[number-1], number)
-    information_gain = entropy(s) - average_entropy(s, attributes[number-1])
+    attributes[number] = split(data, attributes[number], number)
+    information_gain = sample_entropy - average_entropy(s, attributes[number])
 
     if information_gain > max_information_gain:
         max_information_gain = information_gain
