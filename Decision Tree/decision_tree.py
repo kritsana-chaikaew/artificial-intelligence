@@ -30,22 +30,28 @@ def entropy(sample):
     return entropy
 
 def average_entropy(sample, attribute):
-    values = attribute
-    entropies = []
+    weighted_entropy = 0
     sample_size = sum(sample)
 
-    for v in range(len(values)):
-        entropies.append(entropy(values[v]))
+    for value in attribute.keys():
+        weighted_entropy += entropy(attribute[value]) \
+                * sum(attribute[value]) / sample_size
 
-    weight = [(x[0]+x[1])/sample_size for x in values[::]]
-    weighted_entropies = sum(
-            [entropies[i]*weight[i] for i in range(len(entropies))])
-
-    return weighted_entropies
+    return weighted_entropy
 
 
-def classify(data, attribute):
-    pass
+def split(data, attribute):
+    for i in range(1, len(data)):
+        if data[i][5] == 'Yes':
+            index = 0
+        elif data[i][5] == 'No':
+            index = 1
+
+        for value in attribute.keys():
+            if data[i][1] == value:     # 1 is outlook attribute
+                attribute[value][index] += 1
+
+    return attribute
 
 data = []
 data_transpose = []
@@ -55,43 +61,17 @@ with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
     data = [r for r in reader]
     data_transpose = zip(*data)
+    data_transpose = [list(x) for x in data_transpose]
     for row in data_transpose:
         attributes[row[0]] = Attribute(row)
 
-s = (attributes['PlayTennis'].fields.count('Yes'),
-        attributes['PlayTennis'].fields.count('No'))
+s = [attributes['PlayTennis'].fields.count('Yes'),
+        attributes['PlayTennis'].fields.count('No')]
 
-overcast = [0, 0]
-rain = [0, 0]
-sunny = [0, 0]
+outlook = {}
+for value in set(data_transpose[1][1:]):      # 1 is outlook attribute
+    outlook[value] = [0, 0]
 
-outlook = [overcast, rain, sunny]
+outlook = split(data, outlook)
 
-for i in range(1, len(data)):
-    if data[i][5] == 'Yes':
-        index = 0
-    elif data[i][5] == 'No':
-        index = 1
-
-    if data[i][1] == 'Overcast':
-        overcast[index] += 1
-    elif data[i][1] == 'Rain':
-        rain[index] += 1
-    elif data[i][1] == 'Sunny':
-        sunny[index] += 1
-
-overcast_entropy = entropy(overcast)
-rain_entropy = entropy(rain)
-sunny_entropy = entropy(sunny)
-
-entropies = [overcast_entropy, rain_entropy, sunny_entropy]
-weight = [(x[0]+x[1])/14 for x in outlook[::]]
-weighted_entropies = sum(
-        [entropies[i]*weight[i] for i in range(len(entropies))])
-
-print(outlook)
-print(entropies)
-print(weight)
-print(weighted_entropies)
-print(entropy([5,0]))
-print(average_entropy([9, 5], outlook))
+print(average_entropy(s,outlook))
