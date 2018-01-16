@@ -35,11 +35,32 @@ def split(data, attribute, attribute_number):
 
     return attribute
 
+def select_attribute(data, data_transpose):
+    attributes = []
+    max_information_gain = 0
+    root_attribute_number = 0
+
+    sample = [data_transpose[-1].count('Yes'),
+            data_transpose[-1].count('No')]
+
+    sample_entropy = entropy(sample)
+
+    for number in range(len(data[0])-1):
+        attributes.append({})
+        for value in set(data_transpose[number][1:]):
+            attributes[number][value] = [0, 0]
+
+        attributes[number] = split(data, attributes[number], number)
+        information_gain = sample_entropy - average_entropy(sample, attributes[number])
+
+        if information_gain > max_information_gain:
+            max_information_gain = information_gain
+            root_attribute_number = number
+
+    return root_attribute_number
+
 data = []
 data_transpose = []
-attributes = []
-max_information_gain = 0
-root_attribute_number = 0
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
@@ -47,21 +68,5 @@ with open('training_example.csv', newline='') as training_example:
     data_transpose = zip(*data)
     data_transpose = [list(x) for x in data_transpose]
 
-s = [data_transpose[-1].count('Yes'),
-        data_transpose[-1].count('No')]
-
-sample_entropy = entropy(s)
-
-for number in range(len(data[0])-1):
-    attributes.append({})
-    for value in set(data_transpose[number][1:]):
-        attributes[number][value] = [0, 0]
-
-    attributes[number] = split(data, attributes[number], number)
-    information_gain = sample_entropy - average_entropy(s, attributes[number])
-
-    if information_gain > max_information_gain:
-        max_information_gain = information_gain
-        root_attribute_number = number
-
-print(data[0][root_attribute_number])
+root_number = select_attribute(data, data_transpose)
+print(data[0][root_number])
