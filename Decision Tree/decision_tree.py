@@ -29,6 +29,21 @@ def entropy(sample):
 
     return entropy
 
+def average_entropy(sample, attribute):
+    values = attribute
+    entropies = []
+    sample_size = sum(sample)
+
+    for v in range(len(values)):
+        entropies.append(entropy(values[v]))
+
+    weight = [(x[0]+x[1])/sample_size for x in values[::]]
+    weighted_entropies = sum(
+            [entropies[i]*weight[i] for i in range(len(entropies))])
+
+    return weighted_entropies
+
+
 def classify(data, attribute):
     pass
 
@@ -79,3 +94,4 @@ print(entropies)
 print(weight)
 print(weighted_entropies)
 print(entropy([5,0]))
+print(average_entropy([9, 5], outlook))
