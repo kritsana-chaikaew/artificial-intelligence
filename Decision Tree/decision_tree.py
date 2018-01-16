@@ -19,16 +19,15 @@ class Tree(object):
     def __init__(self, root):
         self.root = root
 
-def entropy(positive, negative):
-    if positive == 0 or negative == 0:
-        return 0.0
+def entropy(sample):
+    summation = sum(sample)
+    entropy = 0
+    for s in sample:
+        if s != 0:
+            pob = s / summation
+            entropy -= pob * math.log(pob, 2)
 
-    summation = positive + negative
-    positive_ratio = positive / summation
-    negative_ratio = negative / summation
-
-    return -positive_ratio * math.log(positive_ratio, 2) \
-        - negative_ratio * math.log(negative_ratio, 2)
+    return entropy
 
 def classify(data, attribute):
     pass
@@ -66,15 +65,17 @@ for i in range(1, len(data)):
     elif data[i][1] == 'Sunny':
         sunny[index] += 1
 
-overcast_entropy = entropy(overcast[0], overcast[1])
-rain_entropy = entropy(rain[0], rain[1])
-sunny_entropy = entropy(sunny[0], sunny[1])
+overcast_entropy = entropy(overcast)
+rain_entropy = entropy(rain)
+sunny_entropy = entropy(sunny)
 
 entropies = [overcast_entropy, rain_entropy, sunny_entropy]
 weight = [(x[0]+x[1])/14 for x in outlook[::]]
-weighted_entropies = sum([entropies[i]*weight[i] for i in range(len(entropies))])
+weighted_entropies = sum(
+        [entropies[i]*weight[i] for i in range(len(entropies))])
 
 print(outlook)
 print(entropies)
 print(weight)
 print(weighted_entropies)
+print(entropy([5,0]))
