@@ -38,6 +38,8 @@ def split(data, attribute, attribute_number):
 data = []
 data_transpose = []
 attributes = []
+max_information_gain = 0
+root_attribute_number = 0
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
@@ -48,11 +50,16 @@ with open('training_example.csv', newline='') as training_example:
 s = [data_transpose[5].count('Yes'),
         data_transpose[5].count('No')]
 
-outlook = {}
 for number in range(1, len(data[0])-1):
     attributes.append({})
     for value in set(data_transpose[number][1:]):      # 1 is outlook attribute
         attributes[number-1][value] = [0, 0]
 
     attributes[number-1] = split(data, attributes[number-1], number)
-    print(average_entropy(s,attributes[number-1]))
+    information_gain = entropy(s) - average_entropy(s, attributes[number-1])
+
+    if information_gain > max_information_gain:
+        max_information_gain = information_gain
+        root_attribute_number = number
+
+print(data[0][root_attribute_number])
