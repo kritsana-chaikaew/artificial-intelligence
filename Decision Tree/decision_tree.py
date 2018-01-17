@@ -1,6 +1,16 @@
 import csv
 import math
 
+class Node:
+    def __init__(self):
+        self.attribute = None
+        self.children = []
+
+def transpose(data):
+    data_transpose = [list(x) for x in zip(*data)]
+
+    return data_transpose
+
 def entropy(sample):
     summation = sum(sample)
     entropy = 0
@@ -35,10 +45,11 @@ def split(data, attribute, attribute_number):
 
     return attribute
 
-def select_attribute(data, data_transpose):
+def select_attribute(data):
     attributes = []
     max_information_gain = 0
-    root_attribute_number = 0
+    attribute_number = 0
+    data_transpose = transpose(data)
 
     sample = [data_transpose[-1].count('Yes'),
             data_transpose[-1].count('No')]
@@ -47,6 +58,7 @@ def select_attribute(data, data_transpose):
 
     for number in range(len(data[0])-1):
         attributes.append({})
+
         for value in set(data_transpose[number][1:]):
             attributes[number][value] = [0, 0]
 
@@ -55,18 +67,33 @@ def select_attribute(data, data_transpose):
 
         if information_gain > max_information_gain:
             max_information_gain = information_gain
-            root_attribute_number = number
+            attribute_number = number
 
-    return root_attribute_number
+    return attribute_number, attributes[attribute_number]
+
+def branch(data):
+    data_transpose = transpose(data)
+
+    if len(data_transpose) == 1:
+        return None
+
+    root = Node()
+    number, root.attribute = select_attribute(data)
+
+    for x in data:
+        del x[number]
+    del data_transpose[number]
+
+    for value in root.attribute.keys():
+        root.children.append(branch(data,))
+
+    return root
 
 data = []
-data_transpose = []
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
     data = [r[1:] for r in reader]
-    data_transpose = zip(*data)
-    data_transpose = [list(x) for x in data_transpose]
 
-root_number = select_attribute(data, data_transpose)
-print(data[0][root_number])
+root = branch(data)
+print([x for x in root.children])
