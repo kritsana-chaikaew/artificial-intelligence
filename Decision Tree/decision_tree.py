@@ -34,6 +34,7 @@ def average_entropy(sample, attribute):
 
 def split(data, attribute, attribute_number):
     for i in range(1, len(data)):
+        #print("debug  >>",id(data),i,data[i])
         if data[i][-1] == 'Yes':
             index = 0
         elif data[i][-1] == 'No':
@@ -76,23 +77,33 @@ def select_attribute(data):
 def branch(data):
     data_transpose = transpose(data)
 
-    if len(data_transpose) == 1 or len(data) <= 1:
-        return Node()
+    if len(data_transpose) <= 2 or len(data) <= 2:
+        return None
 
     root = Node()
     number, root.attribute = select_attribute(data)
 
+    count = 0
     for value in root.attribute.keys():
-        new_data = []
+        data_copy = data[:]
+        new_data = list([])
 
-        for i in range(len(data)):
-            if len(data) <= 0 or len(data[i]) <= 0:
-                return Node()
+        for i in range(len(data_copy)):
+            #print("here data    >>", data_copy)
+            #print("here numer   >>", number)
+            #print("here i       >>", i)
+            #print(data_copy[i][number]," == ",value,": ",data_copy[i][number]==value)
+            if data_copy[i][number] == value or i == 0:
+                row = i
 
-            if data[i][number] == value or i == 0:
-                new_data.append(data[i])
-            del data[i][number]
+            #print(id(data), id(data_copy), value, data_copy[i][number])
+            print(id(data_copy), data_copy[i])
+            del data_copy[i][number]
+            new_data.append(data_copy[row])
 
+        print(id(new_data), new_data[0])
+        print(id(new_data), new_data[1])
+        print()
         root.children.append(branch(new_data))
 
     return root
