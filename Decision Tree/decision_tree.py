@@ -47,12 +47,14 @@ def split(data, attribute, attribute_number):
 
 def select_attribute(data):
     attributes = []
-    max_information_gain = 0
     attribute_number = 0
+    max_information_gain = 0
     data_transpose = transpose(data)
 
-    sample = [data_transpose[-1].count('Yes'),
-            data_transpose[-1].count('No')]
+    sample = [0, 0]
+    if len(data_transpose) > 0:
+        sample = [data_transpose[-1].count('Yes'),
+                data_transpose[-1].count('No')]
 
     sample_entropy = entropy(sample)
 
@@ -74,22 +76,26 @@ def select_attribute(data):
 def branch(data):
     data_transpose = transpose(data)
 
-    if len(data_transpose) == 1:
-        return None
+    if len(data_transpose) == 1 or len(data) <= 1:
+        return Node()
 
     root = Node()
     number, root.attribute = select_attribute(data)
 
-    for x in data:
-        del x[number]
-    del data_transpose[number]
-
     for value in root.attribute.keys():
-        root.children.append(branch(data,))
+        new_data = []
+
+        for i in range(len(data)):
+            if len(data) <= 0 or len(data[i]) <= 0:
+                return Node()
+
+            if data[i][number] == value or i == 0:
+                new_data.append(data[i])
+            del data[i][number]
+
+        root.children.append(branch(new_data))
 
     return root
-
-data = []
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
