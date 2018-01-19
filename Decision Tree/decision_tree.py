@@ -73,7 +73,7 @@ def select_attribute(data):
 
     return attribute_number, attributes[attribute_number]
 
-def branch(data):
+def branch(data, depth):
     data_transpose = transpose(data[:])
 
     if len(data_transpose) <= 1 or len(data) <= 2:
@@ -82,26 +82,25 @@ def branch(data):
     root = Node()
     number, root.attribute = select_attribute(data[:])
 
-    print('-------')
-    print(data_transpose[number][0])
+    print(" "*depth*5, '-------')
+    print(" "*depth*5, data_transpose[number][0])
+
     for value in root.attribute.keys():
-        print("\"", value,"\"")
+        print(" "*depth*5, "\"", value,"\"")
         data_copy = data[:]
         new_data = list([])
 
-        for i in range(len(data_copy)):
+        for i in range(len(data)):
             found = False
             if data_copy[i][number] == value or i == 0:
-                row = i
                 found = True
 
-            print(id(data), id(data_copy), id(new_data), value, data_copy[i][number], data[i])
+            print(" "*depth*5, id(data_copy), value, data_copy[i][number], data[i])
             del data_copy[i][number]
             if found == True:
-                new_data.append(data_copy[row][::])
+                new_data.append(data_copy[i][:])
                 found = False
-
-        root.children.append(branch(new_data))
+        root.children.append(branch(new_data[:], depth+1))
 
     return root
 
@@ -109,5 +108,5 @@ with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
     data = [r[1:] for r in reader]
 
-root = branch(data[:])
+root = branch(data[:], 0)
 print([x for x in root.children])
