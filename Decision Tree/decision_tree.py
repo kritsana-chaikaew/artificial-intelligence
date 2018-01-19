@@ -32,16 +32,15 @@ def average_entropy(sample, attribute):
     return weighted_entropy
 
 
-def split(data, attribute, attribute_number):
-    for i in range(1, len(data)):
-        #print("debug  >>",id(data),i,data[i])
+def split(data, attribute, number):
+    for i in range(len(data)):
         if data[i][-1] == 'Yes':
             index = 0
         elif data[i][-1] == 'No':
             index = 1
 
         for value in attribute.keys():
-            if data[i][attribute_number] == value:
+            if data[i][number] == value:
                 attribute[value][index] += 1
 
     return attribute
@@ -50,22 +49,22 @@ def select_attribute(data):
     attributes = []
     attribute_number = 0
     max_information_gain = 0
-    data_transpose = transpose(data)
+    data_transpose = transpose(data[:])
 
     sample = [0, 0]
-    if len(data_transpose) > 0:
+    if len(data_transpose) > 1:
         sample = [data_transpose[-1].count('Yes'),
                 data_transpose[-1].count('No')]
 
     sample_entropy = entropy(sample)
 
-    for number in range(len(data[0])-1):
+    for number in range(len(data[0])-1):        # headers exclude PlayTennis
         attributes.append({})
 
         for value in set(data_transpose[number][1:]):
             attributes[number][value] = [0, 0]
 
-        attributes[number] = split(data, attributes[number], number)
+        split(data[:], attributes[number], number)
         information_gain = sample_entropy - average_entropy(sample, attributes[number])
 
         if information_gain > max_information_gain:
@@ -75,35 +74,33 @@ def select_attribute(data):
     return attribute_number, attributes[attribute_number]
 
 def branch(data):
-    data_transpose = transpose(data)
+    data_transpose = transpose(data[:])
 
-    if len(data_transpose) <= 2 or len(data) <= 2:
+    if len(data_transpose) <= 1 or len(data) <= 2:
         return None
 
     root = Node()
-    number, root.attribute = select_attribute(data)
+    number, root.attribute = select_attribute(data[:])
 
-    count = 0
+    print('-------')
+    print(data_transpose[number][0])
     for value in root.attribute.keys():
+        print("\"", value,"\"")
         data_copy = data[:]
         new_data = list([])
 
         for i in range(len(data_copy)):
-            #print("here data    >>", data_copy)
-            #print("here numer   >>", number)
-            #print("here i       >>", i)
-            #print(data_copy[i][number]," == ",value,": ",data_copy[i][number]==value)
+            found = False
             if data_copy[i][number] == value or i == 0:
                 row = i
+                found = True
 
-            #print(id(data), id(data_copy), value, data_copy[i][number])
-            print(id(data_copy), data_copy[i])
+            print(id(data), id(data_copy), id(new_data), value, data_copy[i][number], data[i])
             del data_copy[i][number]
-            new_data.append(data_copy[row])
+            if found == True:
+                new_data.append(data_copy[row][::])
+                found = False
 
-        print(id(new_data), new_data[0])
-        print(id(new_data), new_data[1])
-        print()
         root.children.append(branch(new_data))
 
     return root
@@ -112,5 +109,5 @@ with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
     data = [r[1:] for r in reader]
 
-root = branch(data)
+root = branch(data[:])
 print([x for x in root.children])
