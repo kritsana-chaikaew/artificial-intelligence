@@ -3,6 +3,7 @@ import math
 
 class Node:
     def __init__(self):
+        self.attribute_name = ''
         self.attribute = None
         self.children = []
 
@@ -46,6 +47,7 @@ def split(data, attribute, number):
 def select_attribute(data):
     attributes = []
     attribute_number = 0
+    attribute_name = ''
     max_information_gain = 0
     data_transpose = transpose(data.copy())
 
@@ -58,6 +60,7 @@ def select_attribute(data):
 
     for number in range(len(data[0])-1):        # headers exclude PlayTennis
         attributes.append({})
+        name = data[0][number]
 
         for value in set(data_transpose[number][1:]):
             attributes[number][value] = [0, 0]
@@ -68,8 +71,11 @@ def select_attribute(data):
         if information_gain > max_information_gain:
             max_information_gain = information_gain
             attribute_number = number
+            attribute_name = name
 
-    return attribute_number, attributes[attribute_number].copy()
+    return attribute_name, \
+            attribute_number, \
+            attributes[attribute_number].copy()
 
 def branch(data, depth):
     data_transpose = transpose(data.copy())
@@ -78,7 +84,7 @@ def branch(data, depth):
         return None
 
     root = Node()
-    number, root.attribute = select_attribute(data.copy())
+    root.attribute_name, number, root.attribute = select_attribute(data.copy())
 
     print(" "*(25-5*depth), '-------')
     print(" "*(25-5*depth), data_transpose[number][0])
@@ -98,13 +104,27 @@ def branch(data, depth):
             if found == True:
                 new_data.append(data_copy[i].copy())
                 found = False
-        root.children.append(branch(new_data.copy(), depth+1))
+        child = branch(new_data.copy(), depth+1)
+        if child is not None:
+            root.children.append(child)
 
     return root
+
+def print_tree(root, depth=0):
+    if depth > 0:
+        print(" "*depth, end="")
+
+    print("|_%s" % root.attribute_name)
+    for child in root.children:
+        if child is not None:
+            print(" "*depth, end="")
+            print_tree(child, depth+1)
+
 
 with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
     data = [r[1:] for r in reader]
 
 root = branch(data.copy(), 0)
-print([x for x in root.children])
+#print([x for x in root.children])
+print_tree(root)
