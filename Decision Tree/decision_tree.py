@@ -43,13 +43,11 @@ def split(data, attribute, number):
             if data[i][number] == value:
                 attribute[value][index] += 1
 
-    return attribute
-
 def select_attribute(data):
     attributes = []
     attribute_number = 0
     max_information_gain = 0
-    data_transpose = transpose(data[:])
+    data_transpose = transpose(data.copy())
 
     sample = [0, 0]
     if len(data_transpose) > 1:
@@ -64,30 +62,30 @@ def select_attribute(data):
         for value in set(data_transpose[number][1:]):
             attributes[number][value] = [0, 0]
 
-        split(data[:], attributes[number], number)
-        information_gain = sample_entropy - average_entropy(sample, attributes[number])
+        split(data.copy(), attributes[number], number)
+        information_gain = sample_entropy - average_entropy(sample, attributes[number].copy())
 
         if information_gain > max_information_gain:
             max_information_gain = information_gain
             attribute_number = number
 
-    return attribute_number, attributes[attribute_number]
+    return attribute_number, attributes[attribute_number].copy()
 
 def branch(data, depth):
-    data_transpose = transpose(data[:])
+    data_transpose = transpose(data.copy())
 
     if len(data_transpose) <= 1 or len(data) <= 2:
         return None
 
     root = Node()
-    number, root.attribute = select_attribute(data[:])
+    number, root.attribute = select_attribute(data.copy())
 
-    print(" "*depth*5, '-------')
-    print(" "*depth*5, data_transpose[number][0])
+    print(" "*(25-5*depth), '-------')
+    print(" "*(25-5*depth), data_transpose[number][0])
 
     for value in root.attribute.keys():
-        print(" "*depth*5, "\"", value,"\"")
-        data_copy = data[:]
+        print(" "*(25-5*depth), "\"", value,"\"")
+        data_copy = [x.copy() for x in data.copy()]
         new_data = list([])
 
         for i in range(len(data)):
@@ -95,12 +93,12 @@ def branch(data, depth):
             if data_copy[i][number] == value or i == 0:
                 found = True
 
-            print(" "*depth*5, id(data_copy), value, data_copy[i][number], data[i])
+            print(" "*(25-5*depth), id(data_copy), value, data_copy[i][number], data[i])
             del data_copy[i][number]
             if found == True:
-                new_data.append(data_copy[i][:])
+                new_data.append(data_copy[i].copy())
                 found = False
-        root.children.append(branch(new_data[:], depth+1))
+        root.children.append(branch(new_data.copy(), depth+1))
 
     return root
 
@@ -108,5 +106,5 @@ with open('training_example.csv', newline='') as training_example:
     reader = csv.reader(training_example)
     data = [r[1:] for r in reader]
 
-root = branch(data[:], 0)
+root = branch(data.copy(), 0)
 print([x for x in root.children])
