@@ -24,4 +24,13 @@ with open('and_training_set.csv') as training_file:
     training_data = [row[:] for row in reader]
     del training_data[0]
 
+target_output = [row[-1] for row in training_data]
+for row in training_data:
+    del row[-1]
+
+lenght = 3
+initialize_weight(weights, lenght)
+
 print(training_data)
+print(target_output)
+print(weights)
