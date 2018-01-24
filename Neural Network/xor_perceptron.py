@@ -1,5 +1,4 @@
 import csv
-import collections
 
 class Node():
     def __init__(self, weight=0):
@@ -19,8 +18,8 @@ class Node():
     def feed(self, _input):       # not efficient
         self.inputs.append(_input)
 
-        self.summation = sum(self.inputs)
-        self.output = self.threshold(self.summation*self.weight)
+        self.summation = sum(self.inputs) + self.weight
+        self.output = self.threshold(self.summation)
 
         for link in self.links:
             link.destination.feed(self.output*link.weight)
@@ -33,6 +32,9 @@ class Node():
 
         for link in self.links:
             link.reset()
+
+    def update(self, weight):
+        self.weight += weight
 
 
 class Link():
@@ -47,6 +49,9 @@ class Link():
         self.weight = self.initial_weight
         self.destination.reset()        # bad idea
 
+    def update(self, weight):
+        self.weight += weight
+
 
 with open('xor_training_set.csv') as training_file:
     reader = csv.reader(training_file)
@@ -56,6 +61,7 @@ del training_data[0]
 training_data = [list(map(int, row)) for row in training_data]
 inputs = []
 target_outputs = []
+learning_rate = 0.01
 
 for row in training_data:
     inputs.append(row[:-1])
@@ -63,21 +69,38 @@ for row in training_data:
 
 initial_weight = 0.1
 
-input_node1 = Node(1)
-input_node2 = Node(1)
+input_node = []
+input_node.append(Node(1))
+input_node.append(Node(1))
 
-hidden_node1 = Node(initial_weight)
-hidden_node2 = Node(initial_weight)
+hidden_node = []
+hidden_node.append(Node(initial_weight))
+hidden_node.append(Node(initial_weight))
 
-output_node = Node(1)
+output_node = Node(initial_weight)
 
-link11 = Link(input_node1, hidden_node1, initial_weight)
-link12 = Link(input_node1, hidden_node2, initial_weight)
-link21 = Link(input_node2, hidden_node1, initial_weight)
-link22 = Link(input_node2, hidden_node2, initial_weight)
-link1O = Link(hidden_node1, output_node, initial_weight)
-link2O = Link(hidden_node2, output_node, initial_weight)
+links = []
+links.append(Link(input_node[0], hidden_node[0], initial_weight))
+links.append(Link(input_node[0], hidden_node[1], initial_weight))
 
-input_node1.feed(1)
-input_node2.feed(-1)
-print(output_node.output)
+links.append(Link(input_node[1], hidden_node[0], initial_weight))
+links.append(Link(input_node[1], hidden_node[1], initial_weight))
+
+links.append(Link(hidden_node[0], output_node, initial_weight))
+links.append(Link(hidden_node[1], output_node, initial_weight))
+
+error = 0
+iteration = 10
+for it in range(iteration):
+    for i in range(len(inputs)):
+        input_node[0].feed(inputs[i][0])
+        input_node[1].feed(inputs[i][1])
+
+        error = target_outputs[i] - output_node.output
+        delta = learning_rate * error
+
+        for link in links:
+            link.update(delta*link.source.output)
+
+        print("%d ^ %d == %d" % (inputs[i][0], inputs[i][1], output_node.output))
+    print()
