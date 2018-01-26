@@ -22,28 +22,19 @@ class Node():
     def feed(self, _input):       # not efficient
         self.inputs.append(_input)
 
-        self.summation = sum(self.inputs) + self.weight
-        self.output = self.threshold(self.summation)
+        if len(self.inputs) == len(self.back_links):
+            self.summation = sum(self.inputs) + self.weight
+            self.output = self.threshold(self.summation)
+            self.inputs.clear()
 
-        for link in self.links:
-            link.destination.feed(self.output*link.weight)
+            for link in self.links:
+                link.destination.feed(self.output*link.weight)
 
-    def reset(self):        # duplicate call, not efficient
-        self.weight = initial_weight
-        self.inputs.clear()
+    def update(self, learning_rate, weight):
+        self.weight +=  learning_rate * weight
 
-        self.output = 0
-        self.summation = 0
-        self.error = 0
-
-        for link in self.links:
-            link.reset()
-
-    def update(self, weight):
-        self.weight += weight * self.source.output
-
-        for link in back_links:
-            link.update(weight*link.source.output)
+        for link in self.back_links:
+            link.update(learning_rate, weight)
 
 
 class Link():
@@ -57,15 +48,11 @@ class Link():
         self.source.links.append(self)
         self.destination.back_links.append(self)
 
-    def reset(self):
-        self.weight = self.initial_weight
-        self.destination.reset()        # bad idea
+    def update(self, learning_rate, weight):
+        self.weight += learning_rate * weight * self.source.output
 
-    def update(self, weight):
-        self.weight += weight
-
-        if back_update:
-            self.source.update(self.weight)
+        if self.back_update:
+            self.source.update(learning_rate, self.weight)
 
 def error(target_output, output):
     return target_output - output
@@ -116,7 +103,8 @@ for it in range(iteration):
         input_nodes[1].feed(inputs[i][1])
 
         for node in output_nodes:
-            node.error = learning_rate * error(target_outputs[i], node.output)
+            weight = error(target_outputs[i], node.output)
+            node.update(learning_rate, weight)
 
         print("%d ^ %d == %d" % (inputs[i][0], inputs[i][1], output_nodes[0].output))
     print()
