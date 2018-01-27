@@ -22,23 +22,17 @@ class Node():
 
         if len(self.inputs) == len(self.back_links):
             self.summation = sum(self.inputs) + self.weight
-            calculate_output()
-            calculate_error()
+            self.output = sigmoid(self.summation)
             self.inputs.clear()
 
             for link in self.links:
                 link.destination.feed(self.output*link.weight)
 
-    def calculate_output():
-        self.output = sigmoid(self.summation)
+    def calculate_error(self, term):
+        return self.output * (1 - self.output) * term
 
-    def calculate_error(target_output):
-        self.sigma = self.output \
-                * (1 - self.output) \
-                * (target_output - self.output)
-
-    def update(self, learning_rate, sigma):
-        self.weight +=  learning_rate * sigma
+    def update(self, learning_rate):
+        self.weight +=  learning_rate * self.sigma
 
         for link in self.back_links:
             link.update(learning_rate, self.sigma)
@@ -57,9 +51,6 @@ class Link():
 
     def update(self, learning_rate, sigma):
         self.weight += learning_rate * sigma * self.source.output
-
-        if self.back_update:
-            self.source.update(learning_rate, sigma*self.weight)
 
 
 with open('xor_training_set.csv') as training_file:
@@ -103,11 +94,17 @@ iteration = 10
 
 for it in range(iteration):
     for i in range(len(inputs)):
-        input_nodes[0].feed(inputs[i][0])
-        input_nodes[1].feed(inputs[i][1])
+        for j in range(len(input_nodes)):
+            input_nodes[j].feed(inputs[i][j])
 
         for node in output_nodes:
-            node.update(learning_rate, node.sigma)
+            node.sigma = node.calculate_error(target_outputs[i]-node.output)
+            node.update(learning_rate)
+
+        for node in hidden_nodes:
+            for link in node.links:
+                node.sigma += node.calculate_error(link.weight*link.destination.sigma)
+            node.update(learning_rate)
 
         print("%d ^ %d == %d" % (inputs[i][0], inputs[i][1], output_nodes[0].output))
     print()
