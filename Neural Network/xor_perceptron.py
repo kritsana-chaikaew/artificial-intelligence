@@ -1,4 +1,5 @@
 import csv
+import math
 
 class Node():
     def __init__(self, weight=0):
@@ -13,11 +14,8 @@ class Node():
         self.output = 0
         self.error = 0
 
-    def threshold(self, _input):
-        if _input > 0:
-            return 1
-        else:
-            return -1
+    def sigmoid(summation):
+        return 1 / (1 + (math.e ** -summation))
 
     def feed(self, _input):       # not efficient
         self.inputs.append(_input)
