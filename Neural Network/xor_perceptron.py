@@ -12,7 +12,7 @@ class Node():
 
         self.summation = 0
         self.output = 0
-        self.error = 0
+        self.sigma = 0
 
     def sigmoid(summation):
         return 1 / (1 + (math.e ** -summation))
@@ -22,17 +22,26 @@ class Node():
 
         if len(self.inputs) == len(self.back_links):
             self.summation = sum(self.inputs) + self.weight
-            self.output = self.threshold(self.summation)
+            calculate_output()
+            calculate_error()
             self.inputs.clear()
 
             for link in self.links:
                 link.destination.feed(self.output*link.weight)
 
-    def update(self, learning_rate, weight):
-        self.weight +=  learning_rate * weight
+    def calculate_output():
+        self.output = sigmoid(self.summation)
+
+    def calculate_error(target_output):
+        self.sigma = self.output \
+                * (1 - self.output) \
+                * (target_output - self.output)
+
+    def update(self, learning_rate, sigma):
+        self.weight +=  learning_rate * sigma
 
         for link in self.back_links:
-            link.update(learning_rate, weight)
+            link.update(learning_rate, self.sigma)
 
 
 class Link():
@@ -46,14 +55,11 @@ class Link():
         self.source.links.append(self)
         self.destination.back_links.append(self)
 
-    def update(self, learning_rate, weight):
-        self.weight += learning_rate * weight * self.source.output
+    def update(self, learning_rate, sigma):
+        self.weight += learning_rate * sigma * self.source.output
 
         if self.back_update:
-            self.source.update(learning_rate, self.weight)
-
-def error(target_output, output):
-    return target_output - output
+            self.source.update(learning_rate, sigma*self.weight)
 
 
 with open('xor_training_set.csv') as training_file:
@@ -101,8 +107,7 @@ for it in range(iteration):
         input_nodes[1].feed(inputs[i][1])
 
         for node in output_nodes:
-            weight = error(target_outputs[i], node.output)
-            node.update(learning_rate, weight)
+            node.update(learning_rate, node.sigma)
 
         print("%d ^ %d == %d" % (inputs[i][0], inputs[i][1], output_nodes[0].output))
     print()
