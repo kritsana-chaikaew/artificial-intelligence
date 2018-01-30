@@ -25,13 +25,16 @@ class Node():
     def feed(self, _input):       # not efficient
         self.inputs.append(_input)
 
-        if len(self.back_links) == 0 or len(self.inputs) == len(self.back_links):
+        if len(self.back_links) == 0:
+            self.output = self.inputs[0]
+        elif len(self.inputs) == len(self.back_links):
             self.summation = sum(self.inputs) + self.weight
             self.threshold()
-            self.inputs.clear()
 
-            for link in self.links:
-                link.destination.feed(self.output*link.weight)
+        self.inputs.clear()
+
+        for link in self.links:
+            link.destination.feed(self.output*link.weight)
 
     def calculate_error(self, term):
         return term #self.output * (1 - self.output) * term
@@ -95,7 +98,7 @@ links.append(Link(input_nodes[1], hidden_nodes[1], initial_weight))
 
 links.append(Link(hidden_nodes[0], output_nodes[0], initial_weight))
 links.append(Link(hidden_nodes[1], output_nodes[0], initial_weight))
-iteration = 200
+iteration = 1
 
 for it in range(iteration):
     for i in range(len(inputs)):
@@ -115,4 +118,3 @@ for it in range(iteration):
         for link in links:
             print('\t', link.weight, end='')
         print()
-    #print()
