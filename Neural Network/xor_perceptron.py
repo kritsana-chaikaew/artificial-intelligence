@@ -3,8 +3,7 @@ import math
 
 class Node():
     def __init__(self, weight=0):
-        self.initial_weight = weight
-        self.weight = initial_weight
+        self.weight = weight
 
         self.inputs = []
         self.links = []
@@ -14,22 +13,28 @@ class Node():
         self.output = 0
         self.sigma = 0
 
-    def sigmoid(summation):
-        return 1 / (1 + (math.e ** -summation))
+    def threshold(self):
+        if self.summation > 0:
+            self.output = 1
+        else:
+            self.output -1
+
+    def sigmoid(self):
+        self.output = 1 / (1 + (math.e ** -self.summation))
 
     def feed(self, _input):       # not efficient
         self.inputs.append(_input)
 
-        if len(self.inputs) == len(self.back_links):
+        if len(self.back_links) == 0 or len(self.inputs) == len(self.back_links):
             self.summation = sum(self.inputs) + self.weight
-            self.output = sigmoid(self.summation)
+            self.threshold()
             self.inputs.clear()
 
             for link in self.links:
                 link.destination.feed(self.output*link.weight)
 
     def calculate_error(self, term):
-        return self.output * (1 - self.output) * term
+        return term #self.output * (1 - self.output) * term
 
     def update(self, learning_rate):
         self.weight +=  learning_rate * self.sigma
@@ -39,12 +44,10 @@ class Node():
 
 
 class Link():
-    def __init__(self, source, destination, weight=0, back_update=True):
+    def __init__(self, source, destination, weight=0):
         self.source = source
         self.destination = destination
-        self.initial_weight = weight
-        self.weight = initial_weight
-        self.back_update = back_update
+        self.weight = weight
 
         self.source.links.append(self)
         self.destination.back_links.append(self)
@@ -64,8 +67,11 @@ target_outputs = []
 learning_rate = 0.01
 
 for row in training_data:
-    inputs.append(row[:-1])
-    target_outputs.append(row[-1])
+    inputs.append([-1 if x==0 else x for x in row[:-1]])
+    if row[-1] == 0:
+        target_outputs.append(-1)
+    else:
+        target_outputs.append(row[-1])
 
 initial_weight = 0.1
 
@@ -81,16 +87,15 @@ output_nodes = []
 output_nodes.append(Node(initial_weight))
 
 links = []
-links.append(Link(input_nodes[0], hidden_nodes[0], initial_weight, False))
-links.append(Link(input_nodes[0], hidden_nodes[1], initial_weight, False))
+links.append(Link(input_nodes[0], hidden_nodes[0], initial_weight))
+links.append(Link(input_nodes[0], hidden_nodes[1], initial_weight))
 
 links.append(Link(input_nodes[1], hidden_nodes[0], initial_weight))
 links.append(Link(input_nodes[1], hidden_nodes[1], initial_weight))
 
 links.append(Link(hidden_nodes[0], output_nodes[0], initial_weight))
 links.append(Link(hidden_nodes[1], output_nodes[0], initial_weight))
-
-iteration = 10
+iteration = 200
 
 for it in range(iteration):
     for i in range(len(inputs)):
@@ -102,9 +107,12 @@ for it in range(iteration):
             node.update(learning_rate)
 
         for node in hidden_nodes:
+            node.sigma = 0
             for link in node.links:
                 node.sigma += node.calculate_error(link.weight*link.destination.sigma)
             node.update(learning_rate)
-
-        print("%d ^ %d == %d" % (inputs[i][0], inputs[i][1], output_nodes[0].output))
-    print()
+        print("% d ^ % d == % d % f % f " % (inputs[i][0], inputs[i][1], target_outputs[i], output_nodes[0].output, output_nodes[0].sigma), end="")
+        for link in links:
+            print('\t', link.weight, end='')
+        print()
+    #print()
