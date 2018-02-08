@@ -33,7 +33,7 @@ train_X, valid_X, train_label, valid_label = train_test_split(
         train_X, train_Y_one_hot, test_size=0.2, random_state=13)
 
 batch_size = 64
-epochs = 10
+epochs = 20
 num_classes = 10
 
 fashion_model = Sequential()
