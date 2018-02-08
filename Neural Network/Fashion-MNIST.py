@@ -2,23 +2,26 @@ from keras.datasets import fashion_mnist
 import numpy as np
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
 (train_X, train_Y), (test_X, test_Y) = fashion_mnist.load_data()
-print('Trening data shape : ', train_X.shape, train_Y.shape)
-print('Testin data shape : ', test_X.shape, test_Y.shape)
 
 classes = np.unique(train_Y)
 nClasses = len(classes)
-print('Total number of outputs : ', nClasses)
-print('Output classes : ', classes)
 
-plt.figure(figsize=[5,5])
+train_X = train_X.reshape(-1, 28, 28, 1)
+test_X = test_X.reshape(-1, 28, 28, 1)
 
-plt.subplot(121)
-plt.imshow(train_X[0, :, :], cmap='gray')
-plt.title('Ground Truth : {}'.format(train_Y[0]))
+train_X = train_X.astype('float32')
+test_X = test_X.astype('float32')
 
-plt.subplot(122)
-plt.imshow(test_X[0, :, :], cmap='gray')
-plt.title('Ground Truth : {}'.format(train_Y[0]))
-plt.show()
+train_X = train_X / 255
+test_X = test_X / 255
+
+train_Y_one_hot = to_categorical(train_Y)
+test_Y_one_hot = to_categorical(test_Y)
+
+train_X, valid_X, train_label, valid_label = train_test_split(
+        train_X, train_Y_one_hot, test_size=0.2, random_state=13)
+
+print(train_X.shape, valid_X.shape, train_label.shape, valid_label.shape)
