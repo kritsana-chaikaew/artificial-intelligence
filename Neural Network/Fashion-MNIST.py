@@ -33,7 +33,7 @@ train_X, valid_X, train_label, valid_label = train_test_split(
         train_X, train_Y_one_hot, test_size=0.2, random_state=13)
 
 batch_size = 64
-epochs = 20
+epochs = 10
 num_classes = 10
 
 fashion_model = Sequential()
@@ -68,7 +68,7 @@ fashion_model.compile(
         loss=keras.losses.categorical_crossentropy,
         optimizer=keras.optimizers.Adam(),
         metrics=['accuracy'])
-fashion_model.summary()
+#fashion_model.summary()
 
 fashion_train = fashion_model.fit(
         train_X, train_label,
@@ -76,3 +76,23 @@ fashion_train = fashion_model.fit(
         epochs=epochs,
         verbose=1,
         validation_data=(valid_X, valid_label))
+
+test_eval = fashion_model.evaluate(test_X, test_Y_one_hot, verbose=0)
+print('Test loss:', test_eval[0])
+print('Test accuracy:', test_eval[1])
+
+accuracy = fashion_train.history['acc']
+val_accuracy = fashion_train.history['val_acc']
+loss = fashion_train.history['loss']
+val_loss = fashion_train.history['val_loss']
+epochs = range(len(accuracy))
+plt.plot(epochs, accuracy, 'bo', label='Training accuracy')
+plt.plot(epochs, val_accuracy, 'b', label='Validation accuracy')
+plt.title('Training and validation accuracy')
+plt.legend()
+plt.figure()
+plt.plot(epochs, loss, 'bo', label='Training loss')
+plt.plot(epochs, val_loss, 'b', label='Validation loss')
+plt.title('Training and validation loss')
+plt.legend()
+plt.show()
