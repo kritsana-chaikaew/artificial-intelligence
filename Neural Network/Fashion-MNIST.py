@@ -45,6 +45,8 @@ fashion_model.add(Conv2D(
         padding='same'))
 fashion_model.add(LeakyReLU(alpha=0.1))
 fashion_model.add(MaxPooling2D((2, 2), padding='same'))
+fashion_model.add(Dropout(0.25))
+
 fashion_model.add(Conv2D(
         64,
         kernel_size=(3, 3),
@@ -52,6 +54,8 @@ fashion_model.add(Conv2D(
         padding='same'))
 fashion_model.add(LeakyReLU(alpha=0.1))
 fashion_model.add(MaxPooling2D((2, 2), padding='same'))
+fashion_model.add(Dropout(0.25))
+
 fashion_model.add(Conv2D(
         128,
         kernel_size=(3, 3),
@@ -59,32 +63,38 @@ fashion_model.add(Conv2D(
         padding='same'))
 fashion_model.add(LeakyReLU(alpha=0.1))
 fashion_model.add(MaxPooling2D((2, 2), padding='same'))
+fashion_model.add(Dropout(0.4))
+
 fashion_model.add(Flatten())
 fashion_model.add(Dense(128, activation='linear'))
 fashion_model.add(LeakyReLU(alpha=0.1))
+fashion_model.add(Dropout(0.3))
 fashion_model.add(Dense(num_classes, activation='softmax'))
+
+fashion_model.summary()
 
 fashion_model.compile(
         loss=keras.losses.categorical_crossentropy,
         optimizer=keras.optimizers.Adam(),
         metrics=['accuracy'])
-#fashion_model.summary()
 
-fashion_train = fashion_model.fit(
+fashion_train_dropout = fashion_model.fit(
         train_X, train_label,
         batch_size=batch_size,
         epochs=epochs,
         verbose=1,
         validation_data=(valid_X, valid_label))
 
+fashion_model.save("fashion_model_dropout.h5py")
+
 test_eval = fashion_model.evaluate(test_X, test_Y_one_hot, verbose=0)
 print('Test loss:', test_eval[0])
 print('Test accuracy:', test_eval[1])
 
-accuracy = fashion_train.history['acc']
-val_accuracy = fashion_train.history['val_acc']
-loss = fashion_train.history['loss']
-val_loss = fashion_train.history['val_loss']
+accuracy = fashion_train_dropout.history['acc']
+val_accuracy = fashion_train_dropout.history['val_acc']
+loss = fashion_train_dropout.history['loss']
+val_loss = fashion_train_dropout.history['val_loss']
 epochs = range(len(accuracy))
 plt.plot(epochs, accuracy, 'bo', label='Training accuracy')
 plt.plot(epochs, val_accuracy, 'b', label='Validation accuracy')
