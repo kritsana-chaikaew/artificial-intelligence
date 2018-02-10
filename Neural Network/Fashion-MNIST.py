@@ -114,6 +114,32 @@ def evaluate(model, history):
     plt.legend()
     plt.show()
 
-fashion_model = build()
-model_history = train(fashion_model)
-evaluate(fashion_model, model_history)
+#fashion_model = build()
+#model_history = train(fashion_model)
+#evaluate(fashion_model, model_history)
+
+fashion_model = load_model('fashion_model_dropout.h5py')
+
+predicted_classes = fashion_model.predict(test_X)
+predicted_classes = np.argmax(np.round(predicted_classes), axis=1)
+print(predicted_classes.shape, test_Y.shape)
+
+correct = np.where(predicted_classes==test_Y)[0]
+print('Found %d correct labels' % len(correct))
+for i, correct in enumerate(correct[:9]):
+   plt.subplot(3, 3, i+1)
+   plt.imshow(test_X[correct].reshape(28, 28), cmap='gray', interpolation='none')
+   plt.title("Predicted {}, Class {}".format(predicted_classes[correct], test_Y[correct]))
+   plt.tight_layout()
+
+plt.show()
+
+incorrect = np.where(predicted_classes!=test_Y)[0]
+print('Found %d incorrect labels' % len(incorrect))
+for i, incorrect in enumerate(incorrect[:9]):
+    plt.subplot(3, 3, i+1)
+    plt.imshow(test_X[incorrect].reshape(28, 28), cmap='gray', interpolation='none')
+    plt.title('Predicted {}, Class {}'.format(predicted_classes[incorrect], test_Y[incorrect]))
+    plt.tight_layout()
+
+plt.show()
