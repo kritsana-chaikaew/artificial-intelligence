@@ -33,7 +33,6 @@ class Node():
                 self.inputs.clear()
                 self.activate()
 
-
     def calculate_delta(self, term):
         return self.output * (1 - self.output) * term
 
@@ -54,8 +53,7 @@ class Link():
         self.weight += learning_rate * self.destination.delta * self.source.output
 
 def initial_weight():
-    return random.random() / 1000     #small weight
-
+    return random.random()
 
 inputs = [
         [1, 1],
@@ -63,7 +61,7 @@ inputs = [
         [0, 1],
         [0, 0]]
 target_outputs = [0, 1, 1, 0]
-learning_rate = 0.01
+learning_rate = 0.1
 
 
 input_nodes = []
@@ -86,7 +84,7 @@ links.append(Link(input_nodes[1], hidden_nodes[1], initial_weight()))
 
 links.append(Link(hidden_nodes[0], output_nodes[0], initial_weight()))
 links.append(Link(hidden_nodes[1], output_nodes[0], initial_weight()))
-iteration = 50000
+iteration = 10000
 
 for it in range(iteration):
     for i in range(len(inputs)):
@@ -111,4 +109,7 @@ for it in range(iteration):
 
         for link in links:
             link.update(learning_rate)
-        print("% d ^ % d == % d % f % f" % (inputs[i][0], inputs[i][1], target_outputs[i], output_nodes[0].output, output_nodes[0].delta))
+        print("%d ^ %d == %d %f -> %d % f" % (
+                inputs[i][0], inputs[i][1],
+                target_outputs[i], output_nodes[0].output,
+                round(output_nodes[0].output), output_nodes[0].delta))
