@@ -30,10 +30,12 @@ radius = distances[k_nearest[-1]]
 pos = 0
 neg = 0
 for idx in k_nearest:
+    weight = 1 / (distances[idx] ** 2)
+
     if sample[idx, 2] == 1:
-        pos += 1
+        pos += weight
     if sample[idx, 2] == -1:
-        neg += 1
+        neg += weight
 
 output = ''
 if pos > neg:
