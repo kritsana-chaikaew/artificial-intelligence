@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 def gaussian(x, u, sd):
-    return math.e ** -(1 / (sd ** 2)) * ((x - u) ** 2)
+    return math.e ** (-(1 / (sd ** 2)) * ((x - u) ** 2))
 
 def expected_z(x, u, sd, j):
     frac = gaussian(x, u[j], sd)
